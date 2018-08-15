@@ -6,10 +6,9 @@ const TwitterStrategy = require("passport-twitter").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const keys = require("./config/keys");
 
-// first express app
+// First express app
+//Note: We can have several express applications inside single node.js project
 const app = express();
-
-// we can have several express applications inside single node.js project
 
 //creates new instance of twitter/fb passport strategy
 // passport.use(
@@ -30,13 +29,17 @@ passport.use(
     {
       clientID: keys.facebookAppId,
       clientSecret: keys.facebookAppSecret,
-      callbackURL: "/auth/facebook/callback"
+      callbackURL: "/auth/facebook/callback",
+      profileFields: ['id', 'email', 'displayName', 'photos']
     },
-    accessToken => {
+    (accessToken, refreshToken, profile, done) => {
       console.log("facebook accessToken", accessToken);
+      console.log("facebook refreshToken", refreshToken);
+      console.log("facebook profile", profile);
     }
   )
 );
+
 
 //setup configuration on the app object to listen to incoming req
 // all route handlers will be registered with the app object
@@ -47,6 +50,9 @@ app.get(
     scope: ["email"]
   })
 );
+
+//the url contains the code this time, passport will take the code and convert it into profile so the access token appears on server console
+app.get("/auth/facebook/callback", passport.authenticate("facebook"));
 
 // app.get(
 //   "/auth/twitter",
