@@ -9,6 +9,8 @@ const keys = require("../config/keys");
 const User = mongoose.model("users");
 
 //creates new instance of twitter/fb passport strategy
+
+/* ================ FACEBOOK STRATEGY ============================== */
 passport.use(
   new FacebookStrategy(
     {
@@ -18,11 +20,22 @@ passport.use(
       profileFields: ["id", "email", "displayName", "photos"]
     },
     (accessToken, refreshToken, profile, done) => {
-      new User({ facebookId: profile.id, name: profile.displayName, emails: profile.emails }).save();
+      //Mongoose queries
+      User.findOne({ facebookId: profile.id }).then(existingUser => {
+        if (existingUser) {
+          done(null, existingUser);
+        } else {
+          //creating model instance/record
+          new User({ facebookId: profile.id, name: profile.displayName, emails: profile.emails })
+          .save()
+          .then(user => done(null, user))
+        }
+      });
     }
   )
 );
 
+/* ================ TWITTER STRATEGY ============================== */
 passport.use(
   new TwitterStrategy(
     {
