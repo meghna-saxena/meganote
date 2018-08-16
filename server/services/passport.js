@@ -17,6 +17,7 @@ passport.serializeUser((user, done) => {
 });
 
 // deserializeUser converts the unique token inside the cookie back to user instance so that the records can be accessed
+// user model instance added to req object as `req.user` which is then forwarded to route handler
 passport.deserializeUser((id, done) => {
   User.findById(id).then(user => {
     done(null, user);
@@ -59,7 +60,7 @@ passport.use(
     {
       consumerKey: keys.twitterAPIKey,
       consumerSecret: keys.twitterAPISecret,
-      callbackURL: "http://127.0.0.1:5000/auth/twitter/callback"
+      callbackURL: "https://127.0.0.1:5000/auth/twitter/callback"
     },
     (oauth_token, tokenSecret, profile, cb) => {
       console.log("twitter oauth_token", oauth_token);

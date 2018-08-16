@@ -1,19 +1,35 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const expressSession = require("express-session");
+const cookieSession = require("cookie-session");
+const passport = require("passport");
 const authRoutes = require("./routes/authRoutes");
 require("./models/User");
 require("./services/passport");
 const keys = require("./config/keys");
 
-//connecting to mongodb
-mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
+/* ================== Connecting to mongodb ======================= */
+mongoose.connect(
+  keys.mongoURI,
+  { useNewUrlParser: true }
+);
 
-// First express app
+/* =================== First express app ========================= */
 //Note: We can have several express applications inside single node.js project
 const app = express();
 
-//express session is required for twitter oauth since it uses oauth1.0
+/* ================= ENABLING COOKIES ============================ */
+app.use(
+  cookieSession({
+    maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
+    keys: [keys.cookieKey]
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+/* =====Express session is required for twitter oauth since it uses oauth1.0 ========= */
 // A temporary secret is stored in the session to prevent cross site scripting attacks.
 app.use(
   expressSession({
