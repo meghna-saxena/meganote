@@ -8,8 +8,22 @@ const keys = require("../config/keys");
 //User is model class
 const User = mongoose.model("users");
 
-//creates new instance of twitter/fb passport strategy
+/* ======================== ENCODING USERS ============================ */
+// user -> model instance from the database
 
+// serializeUser takes user instance add some unique identifier to set cookie for future followup req
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// deserializeUser converts the unique token inside the cookie back to user instance so that the records can be accessed
+passport.deserializeUser((id, done) => {
+  User.findById(id).then(user => {
+    done(null, user);
+  });
+});
+
+//creates new instance of twitter/fb passport strategy
 /* ================ FACEBOOK STRATEGY ============================== */
 passport.use(
   new FacebookStrategy(
@@ -26,9 +40,13 @@ passport.use(
           done(null, existingUser);
         } else {
           //creating model instance/record
-          new User({ facebookId: profile.id, name: profile.displayName, emails: profile.emails })
-          .save()
-          .then(user => done(null, user))
+          new User({
+            facebookId: profile.id,
+            name: profile.displayName,
+            emails: profile.emails
+          })
+            .save()
+            .then(user => done(null, user));
         }
       });
     }
